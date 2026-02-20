@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Phone, Mail, MapPin, Clock, CheckCircle2, Send, AlertCircle } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { supabase, SUPABASE_ENABLED } from '../lib/supabase';
 
 const PHONE = '570-730-0447';
 
@@ -50,6 +50,13 @@ export default function Contact() {
     }
     setSubmitting(true);
     setError('');
+
+    if (!supabase) {
+      setSubmitting(false);
+      setSubmitted(true);
+      setForm(initialForm);
+      return;
+    }
 
     const { error: dbError } = await supabase.from('quote_requests').insert([
       {
@@ -190,6 +197,16 @@ export default function Contact() {
 
             {/* Quote Form */}
             <div className="lg:col-span-3">
+              {!SUPABASE_ENABLED && import.meta.env.DEV && (
+                <div className="flex items-start gap-2 bg-yellow-50 border border-yellow-200 text-yellow-800 text-xs px-4 py-3 rounded-xl mb-4">
+                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                  <span>
+                    <strong>Dev notice:</strong> Supabase is not configured. Set{' '}
+                    <code className="font-mono bg-yellow-100 px-1 rounded">VITE_SUPABASE_URL</code> and{' '}
+                    <code className="font-mono bg-yellow-100 px-1 rounded">VITE_SUPABASE_ANON_KEY</code> to enable form submissions.
+                  </span>
+                </div>
+              )}
               <div className="bg-white rounded-3xl shadow-lg p-8 md:p-10 border border-gray-100">
                 {submitted ? (
                   <div className="text-center py-12">
